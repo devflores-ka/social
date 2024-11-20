@@ -1,8 +1,9 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, field_validator
 import mysql.connector
 from mysql.connector import Error
 from typing import Optional
+from datetime import datetime
 from dotenv import load_dotenv
 import os
 
@@ -21,6 +22,17 @@ class User(BaseModel):
     role: str
     profile_photo_url: Optional[str] = None  # Campo opcional para la URL de S3
     verification_photo_url: Optional[str] = None  # URL de la foto para verificación en S3
+
+    # Validar la fecha de nacimiento con @field_validator
+    @field_validator('dob')
+    def validate_dob(cls, v):
+        try:
+            # Intentamos parsear la fecha en el formato 'yyyy-MM-dd'
+            datetime.strptime(v, '%Y-%m-%d')
+        except ValueError:
+            raise ValueError("La fecha de nacimiento debe estar en formato 'yyyy-MM-dd'")
+        return v
+
 
 # Conexión a MariaDB usando las variables de entorno
 def get_db_connection():
