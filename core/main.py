@@ -24,12 +24,16 @@ class User(BaseModel):
 
 # Conexión a MariaDB usando las variables de entorno
 def get_db_connection():
-    return mysql.connector.connect(
+    conn = mysql.connector.connect(
         host=os.getenv("DB_HOST"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASSWORD"),
         database=os.getenv("DB_NAME")
     )
+    if conn.is_connected():
+        print("Conexión exitosa a la base de datos")
+    return conn
+
 
 @app.get("/")
 def read_root():
@@ -37,6 +41,7 @@ def read_root():
 
 @app.post("/api/usuarios/")
 async def register_user(user: User):
+    print(user)  # Esto te permitirá ver si los datos llegan correctamente
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
