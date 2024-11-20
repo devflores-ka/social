@@ -1,5 +1,5 @@
 [Unit]
-Description=gunicorn daemon
+Description=Gunicorn daemon for FastAPI
 Requires=gunicorn.socket
 After=network.target
 
@@ -7,10 +7,12 @@ After=network.target
 User=ubuntu
 Group=www-data
 WorkingDirectory=/home/ubuntu/social
-ExecStart=/home/ubuntu/djproject/venv/bin/gunicorn \
+ExecStart=/home/ubuntu/social/venv/bin/gunicorn \
           --access-logfile - \
           --workers 3 \
           --bind unix:/run/gunicorn.sock \
-          core.wsgi:application
+          -k uvicorn.workers.UvicornWorker \
+          core.main:app
+
 [Install]
 WantedBy=multi-user.target
