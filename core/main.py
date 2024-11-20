@@ -33,7 +33,6 @@ class User(BaseModel):
             raise ValueError("La fecha de nacimiento debe estar en formato 'yyyy-MM-dd'")
         return v
 
-
 # Conexión a MariaDB usando las variables de entorno
 def get_db_connection():
     conn = mysql.connector.connect(
@@ -46,13 +45,30 @@ def get_db_connection():
         print("Conexión exitosa a la base de datos")
     return conn
 
-
 @app.get("/")
 def read_root():
     return {"message": "Hello, FastAPI!"}
 
 @app.post("/api/usuarios/")
 async def register_user(user: User):
+    # Verificación de edad
+    try:
+        # Convertimos la fecha de nacimiento en un objeto datetime
+        dob = datetime.strptime(user.dob, '%Y-%m-%d')
+        age = user.age
+        current_date = datetime.now()
+        # Calculamos la edad
+        calculated_age = current_date.year - dob.year
+        if current_date.month < dob.month or (current_date.month == dob.month and current_date.day < dob.day):
+            calculated_age -= 1
+        
+        # Verificamos si la edad es mayor o igual a 18
+        if calculated_age < 18:
+            raise HTTPException(status_code=400, detail="Debe tener al menos 18 años")
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
     print(user)  # Esto te permitirá ver si los datos llegan correctamente
     try:
         conn = get_db_connection()
