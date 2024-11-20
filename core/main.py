@@ -31,6 +31,10 @@ def get_db_connection():
         database=os.getenv("DB_NAME")
     )
 
+@app.get("/")
+def read_root():
+    return {"message": "Hello, FastAPI!"}
+
 @app.post("/api/usuarios/")
 async def register_user(user: User):
     try:
